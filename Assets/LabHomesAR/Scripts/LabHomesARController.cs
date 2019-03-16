@@ -10,16 +10,17 @@ public class LabHomesARController : MonoBehaviour
 	/// A prefab for visualizing an AugmentedImage.
 	/// </summary>
 	public AugmentedVisualizerSensor AugmentedVisualizerSensorPrefab;
+    public BlindsVisualizer blinds;
 
-	/// <summary>
-	/// The overlay containing the fit to scan user guide.
-	/// </summary>
-	public GameObject FitToScanOverlay;
+    /// <summary>
+    /// The overlay containing the fit to scan user guide.
+    /// </summary>
+    public GameObject FitToScanOverlay;
 
 	private Dictionary<int, AugmentedVisualizerSensor> m_Visualizers
 		= new Dictionary<int, AugmentedVisualizerSensor>();
 
-	private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
+    private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
 
     public GameObject DetectedPlanePrefab;
     public GameObject Lamp;
@@ -31,6 +32,9 @@ public class LabHomesARController : MonoBehaviour
     private List<DetectedPlane> m_AllPlanes = new List<DetectedPlane>();
     private GameObject humanObject;
     private GameObject lampObject;
+    private BlindsVisualizer visualizerBlinds = null;
+    public Slider slider;
+    public Text monthIndicator;
     private bool planeFound = false;
     private bool lampOn = false;
     private bool runHumanScene = false;
@@ -65,7 +69,7 @@ public class LabHomesARController : MonoBehaviour
 		// have a visualizer. Remove visualizers for stopped images.
 		foreach (var image in m_TempAugmentedImages)
 		{
-			AugmentedVisualizerSensor visualizer = null;
+            AugmentedVisualizerSensor visualizer = null;
 			m_Visualizers.TryGetValue(image.DatabaseIndex, out visualizer);
             // Upon detection of the "Dog" image run the sensors scene
 			if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Dog")
@@ -77,7 +81,7 @@ public class LabHomesARController : MonoBehaviour
 				m_Visualizers.Add(image.DatabaseIndex, visualizer);
 			}
             // Upon detection of the "Earth" image run the Light Bulb/Human scene
-            if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Earth")
+            if (image.TrackingState == TrackingState.Tracking && image.Name == "Earth")
             {
                 if (runHumanScene == false)
                 {
@@ -88,12 +92,24 @@ public class LabHomesARController : MonoBehaviour
                 runHumanScene = true;
                 FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
             }
+            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && image.Name == "Engine")
+            {
+                Anchor anchor = image.CreateAnchor(image.CenterPose);
+                visualizerBlinds = (BlindsVisualizer)Instantiate(blinds, anchor.transform);
+                visualizerBlinds.Image = image;
+
+                BlindsScene();
+            }
             if (image.TrackingState == TrackingState.Stopped && visualizer != null)
 			{
 				m_Visualizers.Remove(image.DatabaseIndex);
 				GameObject.Destroy(visualizer.gameObject);
 			}
-		}
+            if (image.TrackingState == TrackingState.Stopped && visualizerBlinds != null)
+            {
+                GameObject.Destroy(visualizerBlinds.gameObject);
+            }
+        }
 
         // Show the fit-to-scan overlay if there are no images that are Tracking.
         foreach (var visualizer in m_Visualizers.Values)
@@ -104,8 +120,8 @@ public class LabHomesARController : MonoBehaviour
                 return;
             }
         }
-        // Do not show the fit-to-scan overlay if the Light Bulb/Human scene is running
-        if (runHumanScene == true)
+        // Do not show the fit-to-scan overlay if a scene is running
+        if (runHumanScene == true || visualizerBlinds != null)
         {
             FitToScanOverlay.SetActive(false);
         }
@@ -193,6 +209,26 @@ public class LabHomesARController : MonoBehaviour
                 break;
             }
         }
+    }
+
+    public void ExitBlindsScene()
+    {
+        GameObject.Destroy(visualizerBlinds.gameObject);
+
+        // turn off UI elements
+        ExitButton.gameObject.SetActive(false);
+        ExitButton.onClick.RemoveListener(ExitBlindsScene);
+        slider.gameObject.SetActive(false);
+        monthIndicator.gameObject.SetActive(false);
+    }
+
+    public void BlindsScene()
+    {
+        // turn on UI elements
+        ExitButton.gameObject.SetActive(true);
+        ExitButton.onClick.AddListener(ExitBlindsScene);
+        slider.gameObject.SetActive(true);
+        monthIndicator.gameObject.SetActive(true);
     }
 
 }
