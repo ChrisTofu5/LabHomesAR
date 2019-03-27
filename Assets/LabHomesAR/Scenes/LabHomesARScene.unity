@@ -541,7 +541,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4442908887562770, guid: c10877f7cd5764de18d46d7b777d1faa, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 114451889682527732, guid: c10877f7cd5764de18d46d7b777d1faa,
         type: 3}
@@ -1662,6 +1662,7 @@ MonoBehaviour:
     type: 3}
   blinds: {fileID: 1075674954}
   FitToScanOverlay: {fileID: 473579847}
+  DoublePaneWindow: {fileID: 97, guid: aeb77db42987f6740a89a69d67e178e8, type: 3}
   DetectedPlanePrefab: {fileID: 1654175882956584, guid: 6a35c744e5010405c847fad90282d2be,
     type: 3}
   Lamp: {fileID: 2696842470190537620, guid: cb7c01639d2818148ab39998893bce42, type: 3}

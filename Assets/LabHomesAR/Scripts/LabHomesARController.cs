@@ -22,6 +22,7 @@ public class LabHomesARController : MonoBehaviour
 
     private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
 
+    public GameObject DoublePaneWindow;
     public GameObject DetectedPlanePrefab;
     public GameObject Lamp;
     public GameObject Human;
@@ -33,6 +34,7 @@ public class LabHomesARController : MonoBehaviour
     private GameObject humanObject;
     private GameObject lampObject;
     private BlindsVisualizer visualizerBlinds = null;
+    private GameObject visualizerWindow = null;
     public Slider slider;
     public Text monthIndicator;
     private bool planeFound = false;
@@ -71,8 +73,8 @@ public class LabHomesARController : MonoBehaviour
 		{
             AugmentedVisualizerSensor visualizer = null;
 			m_Visualizers.TryGetValue(image.DatabaseIndex, out visualizer);
-            // Upon detection of the "Dog" image run the sensors scene
-			if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Dog")
+            // Upon detection of the "Sensors" image run the Sensors scene
+			if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Sensors")
 			{
 				// Create an anchor to ensure that ARCore keeps tracking this augmented image.
 				Anchor anchor = image.CreateAnchor(image.CenterPose);
@@ -80,8 +82,8 @@ public class LabHomesARController : MonoBehaviour
 				visualizer.Image = image;
 				m_Visualizers.Add(image.DatabaseIndex, visualizer);
 			}
-            // Upon detection of the "Earth" image run the Light Bulb/Human scene
-            if (image.TrackingState == TrackingState.Tracking && image.Name == "Earth")
+            // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
+            if (image.TrackingState == TrackingState.Tracking && image.Name == "LightBulb")
             {
                 if (runHumanScene == false)
                 {
@@ -92,13 +94,20 @@ public class LabHomesARController : MonoBehaviour
                 runHumanScene = true;
                 FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
             }
-            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && image.Name == "Engine")
+            // Upon detection of the "Blinds" image run the Automated Blinds scene
+            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && image.Name == "Blinds")
             {
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
                 visualizerBlinds = (BlindsVisualizer)Instantiate(blinds, anchor.transform);
                 visualizerBlinds.Image = image;
 
                 BlindsScene();
+            }
+            // Upon detection of the "Window" image run the Triple Pane Windows scene
+            if (image.TrackingState == TrackingState.Tracking && visualizerWindow == null && image.Name == "Window")
+            {
+                Anchor anchor = image.CreateAnchor(image.CenterPose);
+                visualizerWindow = Instantiate(DoublePaneWindow, anchor.transform);
             }
             if (image.TrackingState == TrackingState.Stopped && visualizer != null)
 			{
@@ -108,6 +117,10 @@ public class LabHomesARController : MonoBehaviour
             if (image.TrackingState == TrackingState.Stopped && visualizerBlinds != null)
             {
                 GameObject.Destroy(visualizerBlinds.gameObject);
+            }
+            if (image.TrackingState == TrackingState.Stopped && visualizerWindow != null)
+            {
+                GameObject.Destroy(visualizerWindow);
             }
         }
 
