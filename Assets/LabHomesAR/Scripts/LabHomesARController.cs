@@ -259,12 +259,20 @@ public class LabHomesARController : MonoBehaviour
     {
         doubleWindow.SetActive(true);
         tripleWindow.SetActive(false);
+
+        ColorBlock doublePaneColors = DoublePaneButton.colors;
+        doublePaneColors.highlightedColor = new Color(0.7f, 0.85f, 0.9f, 1f);
+        DoublePaneButton.colors = doublePaneColors;
     }
 
     void TriplePane()
     {
         tripleWindow.SetActive(true);
         doubleWindow.SetActive(false);
+
+        ColorBlock triplePaneColors = TriplePaneButton.colors;
+        triplePaneColors.highlightedColor = new Color(0.7f, 0.85f, 0.9f, 1f);
+        TriplePaneButton.colors = triplePaneColors;
     }
 
     void ExitWindowScene()
