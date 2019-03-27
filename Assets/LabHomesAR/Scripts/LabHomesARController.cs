@@ -97,6 +97,8 @@ public class LabHomesARController : MonoBehaviour
             // Upon detection of the "Blinds" image run the Automated Blinds scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && image.Name == "Blinds")
             {
+                slider.gameObject.SetActive(true);
+
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
                 visualizerBlinds = (BlindsVisualizer)Instantiate(blinds, anchor.transform);
                 visualizerBlinds.Image = image;
@@ -134,7 +136,7 @@ public class LabHomesARController : MonoBehaviour
             }
         }
         // Do not show the fit-to-scan overlay if a scene is running
-        if (runHumanScene == true || visualizerBlinds != null)
+        if (runHumanScene == true || visualizerBlinds != null || visualizerWindow != null)
         {
             FitToScanOverlay.SetActive(false);
         }
@@ -240,7 +242,6 @@ public class LabHomesARController : MonoBehaviour
         // turn on UI elements
         ExitButton.gameObject.SetActive(true);
         ExitButton.onClick.AddListener(ExitBlindsScene);
-        slider.gameObject.SetActive(true);
         monthIndicator.gameObject.SetActive(true);
     }
 

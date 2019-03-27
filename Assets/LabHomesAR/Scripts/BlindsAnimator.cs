@@ -9,12 +9,13 @@ using UnityEngine.UI;
 
 public class BlindsAnimator : MonoBehaviour
 {
+    private Slider slider; // Assign the UI slider from the scene to this
     private Animator anim;
-    public Slider slider; // Assign the UI slider from the scene to this
 
     // Use this for initialization
     void Start()
     {
+        slider = GameObject.Find("Slider").GetComponent<Slider>();
         anim = GetComponent<Animator>();
     }
 
