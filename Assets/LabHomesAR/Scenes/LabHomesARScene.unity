@@ -1973,6 +1973,9 @@ MonoBehaviour:
   blinds: {fileID: 5674630812345303919, guid: 5912180a936f60440a006b0696918356, type: 3}
   FitToScanOverlay: {fileID: 473579847}
   DoublePaneWindow: {fileID: 97, guid: aeb77db42987f6740a89a69d67e178e8, type: 3}
+  TriplePaneWindow: {fileID: 97, guid: 4f3ca9c6d424d2b419759fd6dbd7230d, type: 3}
+  DoublePaneButton: {fileID: 1341496715}
+  TriplePaneButton: {fileID: 1609719805}
   DetectedPlanePrefab: {fileID: 1654175882956584, guid: 6a35c744e5010405c847fad90282d2be,
     type: 3}
   Lamp: {fileID: 2696842470190537620, guid: cb7c01639d2818148ab39998893bce42, type: 3}

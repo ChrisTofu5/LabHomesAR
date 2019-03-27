@@ -23,6 +23,9 @@ public class LabHomesARController : MonoBehaviour
     private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
 
     public GameObject DoublePaneWindow;
+    public GameObject TriplePaneWindow;
+    public Button DoublePaneButton;
+    public Button TriplePaneButton;
     public GameObject DetectedPlanePrefab;
     public GameObject Lamp;
     public GameObject Human;
@@ -34,7 +37,8 @@ public class LabHomesARController : MonoBehaviour
     private GameObject humanObject;
     private GameObject lampObject;
     private BlindsVisualizer visualizerBlinds = null;
-    private GameObject visualizerWindow = null;
+    private GameObject doubleWindow = null;
+    private GameObject tripleWindow = null;
     public Slider slider;
     public Text monthIndicator;
     private bool planeFound = false;
@@ -106,10 +110,15 @@ public class LabHomesARController : MonoBehaviour
                 BlindsScene();
             }
             // Upon detection of the "Window" image run the Triple Pane Windows scene
-            if (image.TrackingState == TrackingState.Tracking && visualizerWindow == null && image.Name == "Window")
+            if (image.TrackingState == TrackingState.Tracking && doubleWindow == null && image.Name == "Window")
             {
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
-                visualizerWindow = Instantiate(DoublePaneWindow, anchor.transform);
+                doubleWindow = Instantiate(DoublePaneWindow, anchor.transform);
+                tripleWindow = Instantiate(TriplePaneWindow, anchor.transform);
+                doubleWindow.SetActive(false);
+                tripleWindow.SetActive(false);
+
+                WindowScene();
             }
             if (image.TrackingState == TrackingState.Stopped && visualizer != null)
 			{
@@ -120,9 +129,10 @@ public class LabHomesARController : MonoBehaviour
             {
                 GameObject.Destroy(visualizerBlinds.gameObject);
             }
-            if (image.TrackingState == TrackingState.Stopped && visualizerWindow != null)
+            if (image.TrackingState == TrackingState.Stopped && doubleWindow != null)
             {
-                GameObject.Destroy(visualizerWindow);
+                GameObject.Destroy(doubleWindow);
+                GameObject.Destroy(tripleWindow);
             }
         }
 
@@ -136,7 +146,7 @@ public class LabHomesARController : MonoBehaviour
             }
         }
         // Do not show the fit-to-scan overlay if a scene is running
-        if (runHumanScene == true || visualizerBlinds != null || visualizerWindow != null)
+        if (runHumanScene == true || visualizerBlinds != null || doubleWindow != null)
         {
             FitToScanOverlay.SetActive(false);
         }
@@ -226,7 +236,7 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
-    public void ExitBlindsScene()
+    void ExitBlindsScene()
     {
         GameObject.Destroy(visualizerBlinds.gameObject);
 
@@ -237,12 +247,51 @@ public class LabHomesARController : MonoBehaviour
         monthIndicator.gameObject.SetActive(false);
     }
 
-    public void BlindsScene()
+    void BlindsScene()
     {
         // turn on UI elements
         ExitButton.gameObject.SetActive(true);
         ExitButton.onClick.AddListener(ExitBlindsScene);
         monthIndicator.gameObject.SetActive(true);
+    }
+
+    void DoublePane()
+    {
+        doubleWindow.SetActive(true);
+        tripleWindow.SetActive(false);
+    }
+
+    void TriplePane()
+    {
+        tripleWindow.SetActive(true);
+        doubleWindow.SetActive(false);
+    }
+
+    void ExitWindowScene()
+    {
+        GameObject.Destroy(doubleWindow);
+        GameObject.Destroy(tripleWindow);
+
+        // turn on UI elements
+        ExitButton.gameObject.SetActive(false);
+        ExitButton.onClick.RemoveListener(ExitWindowScene);
+        DoublePaneButton.gameObject.SetActive(false);
+        DoublePaneButton.onClick.RemoveListener(DoublePane);
+        TriplePaneButton.gameObject.SetActive(false);
+        DoublePaneButton.onClick.RemoveListener(TriplePane);
+    }
+
+    void WindowScene()
+    {
+        // turn on UI elements
+        ExitButton.gameObject.SetActive(true);
+        ExitButton.onClick.AddListener(ExitWindowScene);
+
+        DoublePaneButton.gameObject.SetActive(true);
+        DoublePaneButton.onClick.AddListener(DoublePane);
+
+        TriplePaneButton.gameObject.SetActive(true);
+        TriplePaneButton.onClick.AddListener(TriplePane);
     }
 
 }
