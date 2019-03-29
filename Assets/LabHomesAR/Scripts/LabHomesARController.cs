@@ -87,19 +87,19 @@ public class LabHomesARController : MonoBehaviour
 				m_Visualizers.Add(image.DatabaseIndex, visualizer);
 			}
             // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
-            if (image.TrackingState == TrackingState.Tracking && image.Name == "LightBulb")
+            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")
             {
                 if (runHumanScene == false)
                 {
                     SearchingForPlaneUI.SetActive(true);
                     ExitButton.gameObject.SetActive(true);
                     ExitButton.onClick.AddListener(ExitHumanScene);
+                    runHumanScene = true;
+                    FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
                 }
-                runHumanScene = true;
-                FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
             }
             // Upon detection of the "Blinds" image run the Automated Blinds scene
-            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && image.Name == "Blinds")
+            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "Blinds")
             {
                 slider.gameObject.SetActive(true);
 
@@ -110,7 +110,7 @@ public class LabHomesARController : MonoBehaviour
                 BlindsScene();
             }
             // Upon detection of the "Window" image run the Triple Pane Windows scene
-            if (image.TrackingState == TrackingState.Tracking && doubleWindow == null && image.Name == "Window")
+            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "Window")
             {
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
                 doubleWindow = Instantiate(DoublePaneWindow, anchor.transform);
