@@ -14,19 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Images:
   - Name: Blinds
-    Width: 0
+    Width: 0.61
     Quality: 45
     TextureGUID: 7d2eb5fb65c150a448da24acad5c4699
   - Name: LightBulb
-    Width: 0
+    Width: 0.61
     Quality: 100
     TextureGUID: de4e8fb4fc6e1104895de052ac6a2c2f
   - Name: Sensors
-    Width: 0
+    Width: 0.61
     Quality: 45
     TextureGUID: 1b99061d188d1fc46b8b4cebb739afc5
   - Name: Window
-    Width: 0
+    Width: 0.61
     Quality: 75
     TextureGUID: 3f1311bd4f1cc4846a08cb2f419bc5ce
   m_RawData: 
