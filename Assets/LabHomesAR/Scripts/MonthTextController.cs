@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class MonthTextController : MonoBehaviour
 {
     Text monthText;
-    string[] monthArr = {"January","Febuary","March","April",
+    string[] monthArr = {"January","February","March","April",
                         "May","June","July","August","September",
                         "October","November","December" };
     // Start is called before the first frame update
