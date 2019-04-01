@@ -317,7 +317,7 @@ public class LabHomesARController : MonoBehaviour
         GameObject.Destroy(doubleWindow);
         GameObject.Destroy(tripleWindow);
 
-        // turn on UI elements
+        // turn off UI elements
         ExitButton.gameObject.SetActive(false);
         ExitButton.onClick.RemoveListener(ExitWindowScene);
         DoublePaneButton.gameObject.SetActive(false);
