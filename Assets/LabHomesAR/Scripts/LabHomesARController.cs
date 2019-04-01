@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using GoogleARCore;
 using UnityEngine;
@@ -44,6 +45,9 @@ public class LabHomesARController : MonoBehaviour
     private bool planeFound = false;
     private bool lampOn = false;
     private bool runHumanScene = false;
+    private bool movingWindow = false;
+    private bool doubleSelected = false;
+    private bool tripleSelected = false;
 
     /// <summary>
     /// The Unity Update method.
@@ -257,26 +261,59 @@ public class LabHomesARController : MonoBehaviour
 
     void DoublePane()
     {
-        doubleWindow.SetActive(true);
-        tripleWindow.SetActive(false);
+        if (movingWindow == false)
+        {
+            doubleWindow.SetActive(true);
 
-        ColorBlock doublePaneColors = DoublePaneButton.colors;
-        doublePaneColors.highlightedColor = new Color(0.7f, 0.85f, 0.9f, 1f);
-        DoublePaneButton.colors = doublePaneColors;
+            ColorBlock doublePaneColors = DoublePaneButton.colors;
+            doublePaneColors.highlightedColor = new Color(0.7f, 0.85f, 0.9f, 1f);
+            DoublePaneButton.colors = doublePaneColors;
+
+            if (doubleSelected == false)
+            {
+                doubleSelected = true;
+                StartCoroutine(MoveDoubleIn());
+            }
+
+            if (tripleWindow.activeSelf == true)
+            {
+                StartCoroutine(MoveTripleOut());
+            }
+
+            tripleSelected = false;
+        }
     }
 
     void TriplePane()
     {
-        tripleWindow.SetActive(true);
-        doubleWindow.SetActive(false);
+        if (movingWindow == false)
+        {
+            tripleWindow.SetActive(true);
 
-        ColorBlock triplePaneColors = TriplePaneButton.colors;
-        triplePaneColors.highlightedColor = new Color(0.7f, 0.85f, 0.9f, 1f);
-        TriplePaneButton.colors = triplePaneColors;
+            ColorBlock triplePaneColors = TriplePaneButton.colors;
+            triplePaneColors.highlightedColor = new Color(0.7f, 0.85f, 0.9f, 1f);
+            TriplePaneButton.colors = triplePaneColors;
+
+            if (tripleSelected == false)
+            {
+                tripleSelected = true;
+                StartCoroutine(MoveTripleIn());
+            }
+
+            if (doubleWindow.activeSelf == true)
+            {
+                StartCoroutine(MoveDoubleOut());
+            }
+
+            doubleSelected = false;
+        }
     }
 
     void ExitWindowScene()
     {
+        movingWindow = false;
+        doubleSelected = false;
+        tripleSelected = false;
         GameObject.Destroy(doubleWindow);
         GameObject.Destroy(tripleWindow);
 
@@ -300,6 +337,114 @@ public class LabHomesARController : MonoBehaviour
 
         TriplePaneButton.gameObject.SetActive(true);
         TriplePaneButton.onClick.AddListener(TriplePane);
+    }
+
+    IEnumerator MoveDoubleIn()
+    {
+        movingWindow = true;
+        float t = 0.0f;
+        Vector3 start = new Vector3(doubleWindow.transform.position.x - 5.0f,
+                                    doubleWindow.transform.position.y,
+                                    doubleWindow.transform.position.z - 0.5f);
+        Vector3 middle = new Vector3(doubleWindow.transform.position.x,
+                                     doubleWindow.transform.position.y,
+                                     doubleWindow.transform.position.z - 0.5f);
+        Vector3 end = doubleWindow.transform.position;
+        while (t < 1.0f)
+        {
+            t += Time.deltaTime;
+            doubleWindow.transform.position = Vector3.Lerp(start, middle, t / 1.0f);
+            yield return null;
+        }
+        while (t < 1.5f)
+        {
+            t += Time.deltaTime;
+            doubleWindow.transform.position = Vector3.Lerp(middle, end, (t-1.0f) / 0.5f);
+            yield return null;
+        }
+        movingWindow = false;
+    }
+
+    IEnumerator MoveDoubleOut()
+    {
+        movingWindow = true;
+        float t = 0.0f;
+        Vector3 start = doubleWindow.transform.position;
+        Vector3 middle = new Vector3(doubleWindow.transform.position.x,
+                                     doubleWindow.transform.position.y,
+                                     doubleWindow.transform.position.z - 0.5f);
+        Vector3 end = new Vector3(doubleWindow.transform.position.x - 5.0f,
+                                  doubleWindow.transform.position.y,
+                                  doubleWindow.transform.position.z - 0.5f);
+        while (t < 0.5f)
+        {
+            t += Time.deltaTime;
+            doubleWindow.transform.position = Vector3.Lerp(start, middle, t / 0.5f);
+            yield return null;
+        }
+        while (t < 1.5f)
+        {
+            t += Time.deltaTime;
+            doubleWindow.transform.position = Vector3.Lerp(middle, end, (t - 0.5f) / 1.0f);
+            yield return null;
+        }
+        doubleWindow.transform.position = start;
+        movingWindow = false;
+        doubleWindow.SetActive(false);
+    }
+
+    IEnumerator MoveTripleIn()
+    {
+        movingWindow = true;
+        float t = 0.0f;
+        Vector3 start = new Vector3(tripleWindow.transform.position.x + 5.0f,
+                                    tripleWindow.transform.position.y,
+                                    tripleWindow.transform.position.z - 0.5f);
+        Vector3 middle = new Vector3(tripleWindow.transform.position.x,
+                                     tripleWindow.transform.position.y,
+                                     tripleWindow.transform.position.z - 0.5f);
+        Vector3 end = tripleWindow.transform.position;
+        while (t < 1.0f)
+        {
+            t += Time.deltaTime;
+            tripleWindow.transform.position = Vector3.Lerp(start, middle, t / 1.0f);
+            yield return null;
+        }
+        while (t < 1.5f)
+        {
+            t += Time.deltaTime;
+            tripleWindow.transform.position = Vector3.Lerp(middle, end, (t - 1.0f) / 0.5f);
+            yield return null;
+        }
+        movingWindow = false;
+    }
+
+    IEnumerator MoveTripleOut()
+    {
+        movingWindow = true;
+        float t = 0.0f;
+        Vector3 start = tripleWindow.transform.position;
+        Vector3 middle = new Vector3(tripleWindow.transform.position.x,
+                                     tripleWindow.transform.position.y,
+                                     tripleWindow.transform.position.z - 0.5f);
+        Vector3 end = new Vector3(tripleWindow.transform.position.x + 5.0f,
+                                  tripleWindow.transform.position.y,
+                                  tripleWindow.transform.position.z - 0.5f);
+        while (t < 0.5f)
+        {
+            t += Time.deltaTime;
+            tripleWindow.transform.position = Vector3.Lerp(start, middle, t / 0.5f);
+            yield return null;
+        }
+        while (t < 1.5f)
+        {
+            t += Time.deltaTime;
+            tripleWindow.transform.position = Vector3.Lerp(middle, end, (t - 0.5f) / 1.0f);
+            yield return null;
+        }
+        tripleWindow.transform.position = start;
+        movingWindow = false;
+        tripleWindow.SetActive(false);
     }
 
 }
