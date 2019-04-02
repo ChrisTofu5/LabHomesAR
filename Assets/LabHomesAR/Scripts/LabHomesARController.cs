@@ -49,6 +49,31 @@ public class LabHomesARController : MonoBehaviour
     private bool doubleSelected = false;
     private bool tripleSelected = false;
 
+    // The audio clips
+    public AudioClip Sensors;
+    public AudioClip AutoBlindsUp;
+    public AudioClip AutoBlindsDown;
+    public AudioClip LampOff;
+    public AudioClip LampOn;
+    public AudioClip DoubleSelected;
+    public AudioClip TripleSelected;
+    public AudioClip BothSelected;
+
+    private AudioSource SensorsSource;
+    private AudioSource AutoBlindsUpSource;
+    private AudioSource AutoBlindsDownSource;
+    private AudioSource LampOffSource;
+    private AudioSource LampOnSource;
+    private AudioSource DoubleSelectedSource;
+    private AudioSource TripleSelectedSource;
+    private AudioSource BothSelectedSource;
+
+    void Start()
+    {
+        SensorsSource = gameObject.AddComponent<AudioSource>();
+        SensorsSource.clip = Sensors;
+    }
+
     /// <summary>
     /// The Unity Update method.
     /// </summary>
@@ -89,6 +114,7 @@ public class LabHomesARController : MonoBehaviour
 				visualizer = (AugmentedVisualizerSensor)Instantiate(AugmentedVisualizerSensorPrefab, anchor.transform);
 				visualizer.Image = image;
 				m_Visualizers.Add(image.DatabaseIndex, visualizer);
+                SensorsSource.Play();
 			}
             // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")

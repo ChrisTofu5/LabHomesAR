@@ -1986,3 +1986,11 @@ MonoBehaviour:
   SearchingForPlaneUI: {fileID: 252447301}
   slider: {fileID: 1743935110}
   monthIndicator: {fileID: 514227652}
+  Sensors: {fileID: 8300000, guid: f8edd0fab9b610b45a8e3ad834792232, type: 3}
+  AutoBlindsUp: {fileID: 8300000, guid: 1fbb7eda81fa41049a1863090522b109, type: 3}
+  AutoBlindsDown: {fileID: 8300000, guid: 8df52a36cc1295047b4ff094d916593f, type: 3}
+  LampOff: {fileID: 8300000, guid: 3b8af50313c3baf4eb318c56a86b589b, type: 3}
+  LampOn: {fileID: 8300000, guid: 6392f5403f480734eaa4d8addf855dd6, type: 3}
+  DoubleSelected: {fileID: 8300000, guid: 336caf67757b9f14892e1b6085ecb66c, type: 3}
+  TripleSelected: {fileID: 8300000, guid: 51c2cff0a7b9ca8478cc66d7901d0d0f, type: 3}
+  BothSelected: {fileID: 8300000, guid: 6e0107b874747204d8a05f5eddb455f0, type: 3}
