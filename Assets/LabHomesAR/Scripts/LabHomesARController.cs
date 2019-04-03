@@ -48,6 +48,9 @@ public class LabHomesARController : MonoBehaviour
     private bool movingWindow = false;
     private bool doubleSelected = false;
     private bool tripleSelected = false;
+    private bool lampOnAudioPlayed = false;
+    private bool doubleAudioPlayed = false;
+    private bool tripleAudioPlayed = false;
 
     // The audio clips
     public AudioClip Sensors;
@@ -59,19 +62,11 @@ public class LabHomesARController : MonoBehaviour
     public AudioClip TripleSelected;
     public AudioClip BothSelected;
 
-    private AudioSource SensorsSource;
-    private AudioSource AutoBlindsUpSource;
-    private AudioSource AutoBlindsDownSource;
-    private AudioSource LampOffSource;
-    private AudioSource LampOnSource;
-    private AudioSource DoubleSelectedSource;
-    private AudioSource TripleSelectedSource;
-    private AudioSource BothSelectedSource;
+    private AudioSource audioSource;
 
     void Start()
     {
-        SensorsSource = gameObject.AddComponent<AudioSource>();
-        SensorsSource.clip = Sensors;
+        audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     /// <summary>
@@ -114,7 +109,9 @@ public class LabHomesARController : MonoBehaviour
 				visualizer = (AugmentedVisualizerSensor)Instantiate(AugmentedVisualizerSensorPrefab, anchor.transform);
 				visualizer.Image = image;
 				m_Visualizers.Add(image.DatabaseIndex, visualizer);
-                SensorsSource.Play();
+                audioSource.Stop();
+                audioSource.clip = Sensors;
+                audioSource.Play();
 			}
             // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")
@@ -126,6 +123,9 @@ public class LabHomesARController : MonoBehaviour
                     ExitButton.onClick.AddListener(ExitHumanScene);
                     runHumanScene = true;
                     FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
+                    audioSource.Stop();
+                    audioSource.clip = LampOff;
+                    audioSource.Play();
                 }
             }
             // Upon detection of the "Blinds" image run the Automated Blinds scene
@@ -137,6 +137,9 @@ public class LabHomesARController : MonoBehaviour
                 visualizerBlinds = (BlindsVisualizer)Instantiate(blinds, anchor.transform);
                 visualizerBlinds.Image = image;
 
+                audioSource.Stop();
+                audioSource.clip = AutoBlindsUp;
+                audioSource.Play();
                 BlindsScene();
             }
             // Upon detection of the "Window" image run the Triple Pane Windows scene
@@ -148,6 +151,7 @@ public class LabHomesARController : MonoBehaviour
                 doubleWindow.SetActive(false);
                 tripleWindow.SetActive(false);
 
+                audioSource.Stop();
                 WindowScene();
             }
             if (image.TrackingState == TrackingState.Stopped && visualizer != null)
@@ -195,6 +199,11 @@ public class LabHomesARController : MonoBehaviour
             LampButton.GetComponentInChildren<Text>().text = "Turn Lamp Off";
             lampObject.GetComponentInChildren<Light>().enabled = true;
             lampOn = true;
+            if (lampOnAudioPlayed == false)
+            {
+                StartCoroutine("LampOnAudio");
+                lampOnAudioPlayed = true;
+            }
         }
         else
         {
@@ -208,6 +217,9 @@ public class LabHomesARController : MonoBehaviour
     // This function exits the Light Bulb/Human scene and resets several variables
     void ExitHumanScene()
     {
+        audioSource.Stop();
+        StopCoroutine("LampOnAudio");
+        lampOnAudioPlayed = false;
         planeFound = false;
         lampOn = false;
         runHumanScene = false;
@@ -268,6 +280,10 @@ public class LabHomesARController : MonoBehaviour
 
     void ExitBlindsScene()
     {
+        audioSource.Stop();
+        StopCoroutine("CheckBlindsDown");
+        StopCoroutine("BlindsDownAudio");
+
         GameObject.Destroy(visualizerBlinds.gameObject);
 
         // turn off UI elements
@@ -279,6 +295,8 @@ public class LabHomesARController : MonoBehaviour
 
     void BlindsScene()
     {
+        StartCoroutine("CheckBlindsDown");
+
         // turn on UI elements
         ExitButton.gameObject.SetActive(true);
         ExitButton.onClick.AddListener(ExitBlindsScene);
@@ -307,6 +325,11 @@ public class LabHomesARController : MonoBehaviour
             }
 
             tripleSelected = false;
+
+            if (doubleAudioPlayed == false)
+            {
+                StartCoroutine("DoubleAudio");
+            }
         }
     }
 
@@ -332,11 +355,22 @@ public class LabHomesARController : MonoBehaviour
             }
 
             doubleSelected = false;
+
+            if (tripleAudioPlayed == false)
+            {
+                StartCoroutine("TripleAudio");
+            }
         }
     }
 
     void ExitWindowScene()
     {
+        audioSource.Stop();
+        StopCoroutine("DoubleAudio");
+        StopCoroutine("TripleAudio");
+        StopCoroutine("BothAudio");
+        doubleAudioPlayed = false;
+        tripleAudioPlayed = false;
         movingWindow = false;
         doubleSelected = false;
         tripleSelected = false;
@@ -471,6 +505,75 @@ public class LabHomesARController : MonoBehaviour
         tripleWindow.transform.position = start;
         movingWindow = false;
         tripleWindow.SetActive(false);
+    }
+
+    IEnumerator LampOnAudio()
+    {
+        while (audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        audioSource.clip = LampOn;
+        audioSource.Play();
+    }
+
+    IEnumerator DoubleAudio()
+    {
+        while (audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        audioSource.clip = DoubleSelected;
+        audioSource.Play();
+        doubleAudioPlayed = true;
+        if (doubleAudioPlayed && tripleAudioPlayed)
+        {
+            StartCoroutine("BothAudio");
+        }
+    }
+
+    IEnumerator TripleAudio()
+    {
+        while (audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        audioSource.clip = TripleSelected;
+        audioSource.Play();
+        tripleAudioPlayed = true;
+        if (doubleAudioPlayed && tripleAudioPlayed)
+        {
+            StartCoroutine("BothAudio");
+        }
+    }
+
+    IEnumerator BothAudio()
+    {
+        while (audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        audioSource.clip = BothSelected;
+        audioSource.Play();
+    }
+
+    IEnumerator CheckBlindsDown()
+    {
+        while (slider.value != 1 && slider.value != 2 && slider.value != 3 && slider.value != 4 && slider.value != 11 && slider.value != 12)
+        {
+            yield return null;
+        }
+        StartCoroutine("BlindsDownAudio");
+    }
+
+    IEnumerator BlindsDownAudio()
+    {
+        while (audioSource.isPlaying)
+        {
+            yield return null;
+        }
+        audioSource.clip = AutoBlindsDown;
+        audioSource.Play();
     }
 
 }
