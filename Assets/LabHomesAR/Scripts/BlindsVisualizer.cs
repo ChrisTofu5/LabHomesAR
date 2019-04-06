@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using GoogleARCore;
-using GoogleARCoreInternal;
+﻿using GoogleARCore;
 using UnityEngine;
-using UnityEngine.UI;
-
 
 public class BlindsVisualizer : MonoBehaviour
 {
     public AugmentedImage Image;
     public GameObject blinds;
 
+    // Update is called once per frame. It is used here to show the blinds if the target image is detected.
     public void Update()
     {
         if (Image == null || Image.TrackingState != TrackingState.Tracking)

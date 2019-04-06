@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using GoogleARCore;
-using GoogleARCoreInternal;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class BlindsAnimator : MonoBehaviour
@@ -12,14 +6,15 @@ public class BlindsAnimator : MonoBehaviour
     private Slider slider; // Assign the UI slider from the scene to this
     private Animator anim;
 
-    // Use this for initialization
+    // Start is called on the first frame. It is used here to get the slider object.
     void Start()
     {
         slider = GameObject.Find("Slider").GetComponent<Slider>();
         anim = GetComponent<Animator>();
     }
 
-    void Update()
+    // Update is called once per frame. It is used here to move the blinds up and down based on the slider.
+    public void Update()
     {
         switch ((int)slider.value)
         {

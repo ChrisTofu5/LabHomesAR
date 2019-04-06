@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using GoogleARCore;
-using GoogleARCoreInternal;
+﻿using GoogleARCore;
 using UnityEngine;
 
 public class AugmentedVisualizerSensor : MonoBehaviour
@@ -11,6 +7,7 @@ public class AugmentedVisualizerSensor : MonoBehaviour
 	public GameObject indoorTempData;
     public GameObject windowTempData;
 
+    // Update is called once per frame. It is used here to show the sensors graphs if the target image is detected.
     public void Update()
 	{
 		if (Image == null || Image.TrackingState != TrackingState.Tracking)

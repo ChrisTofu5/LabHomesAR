@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using GoogleARCore;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +7,7 @@ using UnityEngine.UI;
 public class LabHomesARController : MonoBehaviour
 {
 	/// <summary>
-	/// A prefab for visualizing an AugmentedImage.
+	/// Prefabs for visualizing an AugmentedImage.
 	/// </summary>
 	public AugmentedVisualizerSensor AugmentedVisualizerSensorPrefab;
     public BlindsVisualizer blinds;
@@ -18,11 +17,7 @@ public class LabHomesARController : MonoBehaviour
     /// </summary>
     public GameObject FitToScanOverlay;
 
-	private Dictionary<int, AugmentedVisualizerSensor> m_Visualizers
-		= new Dictionary<int, AugmentedVisualizerSensor>();
-
-    private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
-
+    // Objects that are connected to the script through the scene
     public GameObject DoublePaneWindow;
     public GameObject TriplePaneWindow;
     public Button DoublePaneButton;
@@ -34,14 +29,18 @@ public class LabHomesARController : MonoBehaviour
     public Button LampButton;
     public Button ExitButton;
     public GameObject SearchingForPlaneUI;
+    public Slider slider;
+    public Text monthIndicator;
+
+    // Objects and variables that are defined in the script
+    private Dictionary<int, AugmentedVisualizerSensor> m_Visualizers = new Dictionary<int, AugmentedVisualizerSensor>();
+    private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
     private List<DetectedPlane> m_AllPlanes = new List<DetectedPlane>();
     private GameObject humanObject;
     private GameObject lampObject;
     private BlindsVisualizer visualizerBlinds = null;
     private GameObject doubleWindow = null;
     private GameObject tripleWindow = null;
-    public Slider slider;
-    public Text monthIndicator;
     private bool planeFound = false;
     private bool lampOn = false;
     private bool runHumanScene = false;
@@ -61,17 +60,15 @@ public class LabHomesARController : MonoBehaviour
     public AudioClip DoubleSelected;
     public AudioClip TripleSelected;
     public AudioClip BothSelected;
-
     private AudioSource audioSource;
 
+    // Start is called on the first frame. It is used here to create an AudioSource to play the audio clips.
     void Start()
     {
         audioSource = gameObject.AddComponent<AudioSource>();
     }
 
-    /// <summary>
-    /// The Unity Update method.
-    /// </summary>
+    // This function is called every frame and controls the application. It runs the scenes and displays the buttons and 3D objects after the target images are detected.
     public void Update()
 	{
         // Run the Light Bulb/Human scene if the target image was detected
@@ -101,6 +98,7 @@ public class LabHomesARController : MonoBehaviour
 		{
             AugmentedVisualizerSensor visualizer = null;
 			m_Visualizers.TryGetValue(image.DatabaseIndex, out visualizer);
+
             // Upon detection of the "Sensors" image run the Sensors scene
 			if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Sensors")
 			{
@@ -113,6 +111,7 @@ public class LabHomesARController : MonoBehaviour
                 audioSource.clip = Sensors;
                 audioSource.Play();
 			}
+
             // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")
             {
@@ -128,6 +127,7 @@ public class LabHomesARController : MonoBehaviour
                     audioSource.Play();
                 }
             }
+
             // Upon detection of the "Blinds" image run the Automated Blinds scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "Blinds")
             {
@@ -142,6 +142,7 @@ public class LabHomesARController : MonoBehaviour
                 audioSource.Play();
                 BlindsScene();
             }
+
             // Upon detection of the "Window" image run the Triple Pane Windows scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "Window")
             {
@@ -154,6 +155,8 @@ public class LabHomesARController : MonoBehaviour
                 audioSource.Stop();
                 WindowScene();
             }
+
+            // Remove the objects for each scene when the image for that scene is no longer tracking
             if (image.TrackingState == TrackingState.Stopped && visualizer != null)
 			{
 				m_Visualizers.Remove(image.DatabaseIndex);
@@ -278,6 +281,7 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
+    // This function exits the Automated Blinds scene
     void ExitBlindsScene()
     {
         audioSource.Stop();
@@ -293,6 +297,7 @@ public class LabHomesARController : MonoBehaviour
         monthIndicator.gameObject.SetActive(false);
     }
 
+    // This function runs the Automated Blinds scene
     void BlindsScene()
     {
         StartCoroutine("CheckBlindsDown");
@@ -303,6 +308,7 @@ public class LabHomesARController : MonoBehaviour
         monthIndicator.gameObject.SetActive(true);
     }
 
+    // This function adds the double pane window to the scene after the double pane window button is pressed
     void DoublePane()
     {
         if (movingWindow == false)
@@ -333,6 +339,7 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
+    // This function adds the triple pane window to the scene after the triple pane window button is pressed
     void TriplePane()
     {
         if (movingWindow == false)
@@ -363,6 +370,7 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
+    // This function exits the Triple Pane Windows scene and resets several variables
     void ExitWindowScene()
     {
         audioSource.Stop();
@@ -386,6 +394,7 @@ public class LabHomesARController : MonoBehaviour
         DoublePaneButton.onClick.RemoveListener(TriplePane);
     }
 
+    // This function runs the Triple Pane Windows scene
     void WindowScene()
     {
         // turn on UI elements
@@ -399,6 +408,7 @@ public class LabHomesARController : MonoBehaviour
         TriplePaneButton.onClick.AddListener(TriplePane);
     }
 
+    // This function slides the double pane window over the real window
     IEnumerator MoveDoubleIn()
     {
         movingWindow = true;
@@ -425,6 +435,7 @@ public class LabHomesARController : MonoBehaviour
         movingWindow = false;
     }
 
+    // This function slides the double pane window off from the real window
     IEnumerator MoveDoubleOut()
     {
         movingWindow = true;
@@ -453,6 +464,7 @@ public class LabHomesARController : MonoBehaviour
         doubleWindow.SetActive(false);
     }
 
+    // This function slides the triple pane window over the real window
     IEnumerator MoveTripleIn()
     {
         movingWindow = true;
@@ -479,6 +491,7 @@ public class LabHomesARController : MonoBehaviour
         movingWindow = false;
     }
 
+    // This function slides the triple pane window off from the real window
     IEnumerator MoveTripleOut()
     {
         movingWindow = true;
@@ -507,6 +520,7 @@ public class LabHomesARController : MonoBehaviour
         tripleWindow.SetActive(false);
     }
 
+    // This function plays audio after the lamp is turned on in the Light Bulb/Human scene
     IEnumerator LampOnAudio()
     {
         while (audioSource.isPlaying)
@@ -517,6 +531,7 @@ public class LabHomesARController : MonoBehaviour
         audioSource.Play();
     }
 
+    // This function plays audio after the double pane window is selected in the Triple Pane Windows scene
     IEnumerator DoubleAudio()
     {
         while (audioSource.isPlaying)
@@ -532,6 +547,7 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
+    // This function plays audio after the triple pane window is selected in the Triple Pane Windows scene
     IEnumerator TripleAudio()
     {
         while (audioSource.isPlaying)
@@ -547,6 +563,7 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
+    // This function plays audio after both windows are selected in the Triple Pane Windows scene
     IEnumerator BothAudio()
     {
         while (audioSource.isPlaying)
@@ -557,6 +574,7 @@ public class LabHomesARController : MonoBehaviour
         audioSource.Play();
     }
 
+    // This function checks if the blinds are on a month where they go down in the Automated Blinds scene
     IEnumerator CheckBlindsDown()
     {
         while (slider.value != 1 && slider.value != 2 && slider.value != 3 && slider.value != 4 && slider.value != 11 && slider.value != 12)
@@ -566,6 +584,7 @@ public class LabHomesARController : MonoBehaviour
         StartCoroutine("BlindsDownAudio");
     }
 
+    // This function plays audio after the blinds go down in the Automated Blinds scene
     IEnumerator BlindsDownAudio()
     {
         while (audioSource.isPlaying)
