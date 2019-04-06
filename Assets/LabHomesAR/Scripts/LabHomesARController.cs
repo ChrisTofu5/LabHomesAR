@@ -6,10 +6,10 @@ using UnityEngine.UI;
 
 public class LabHomesARController : MonoBehaviour
 {
-	/// <summary>
-	/// Prefabs for visualizing an AugmentedImage.
-	/// </summary>
-	public AugmentedVisualizerSensor AugmentedVisualizerSensorPrefab;
+    /// <summary>
+    /// Prefabs for visualizing an AugmentedImage.
+    /// </summary>
+    public AugmentedVisualizerSensor AugmentedVisualizerSensorPrefab;
     public BlindsVisualizer blinds;
 
     /// <summary>
@@ -70,7 +70,7 @@ public class LabHomesARController : MonoBehaviour
 
     // This function is called every frame and controls the application. It runs the scenes and displays the buttons and 3D objects after the target images are detected.
     public void Update()
-	{
+    {
         // Run the Light Bulb/Human scene if the target image was detected
         if (runHumanScene == true)
         {
@@ -79,38 +79,38 @@ public class LabHomesARController : MonoBehaviour
 
         // Exit the app when the 'back' button is pressed.
         if (Input.GetKey(KeyCode.Escape))
-		{
-			Application.Quit();
-		}
+        {
+            Application.Quit();
+        }
 
-		// Check that motion tracking is tracking.
-		if (Session.Status != SessionStatus.Tracking)
-		{
-			return;
-		}
+        // Check that motion tracking is tracking.
+        if (Session.Status != SessionStatus.Tracking)
+        {
+            return;
+        }
 
-		// Get updated augmented images for this frame.
-		Session.GetTrackables<AugmentedImage>(m_TempAugmentedImages, TrackableQueryFilter.Updated);
+        // Get updated augmented images for this frame.
+        Session.GetTrackables<AugmentedImage>(m_TempAugmentedImages, TrackableQueryFilter.Updated);
 
-		// Create visualizers and anchors for updated augmented images that are tracking and do not previously
-		// have a visualizer. Remove visualizers for stopped images.
-		foreach (var image in m_TempAugmentedImages)
-		{
+        // Create visualizers and anchors for updated augmented images that are tracking and do not previously
+        // have a visualizer. Remove visualizers for stopped images.
+        foreach (var image in m_TempAugmentedImages)
+        {
             AugmentedVisualizerSensor visualizer = null;
-			m_Visualizers.TryGetValue(image.DatabaseIndex, out visualizer);
+            m_Visualizers.TryGetValue(image.DatabaseIndex, out visualizer);
 
             // Upon detection of the "Sensors" image run the Sensors scene
-			if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Sensors")
-			{
-				// Create an anchor to ensure that ARCore keeps tracking this augmented image.
-				Anchor anchor = image.CreateAnchor(image.CenterPose);
-				visualizer = (AugmentedVisualizerSensor)Instantiate(AugmentedVisualizerSensorPrefab, anchor.transform);
-				visualizer.Image = image;
-				m_Visualizers.Add(image.DatabaseIndex, visualizer);
+            if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Sensors")
+            {
+                // Create an anchor to ensure that ARCore keeps tracking this augmented image.
+                Anchor anchor = image.CreateAnchor(image.CenterPose);
+                visualizer = (AugmentedVisualizerSensor)Instantiate(AugmentedVisualizerSensorPrefab, anchor.transform);
+                visualizer.Image = image;
+                m_Visualizers.Add(image.DatabaseIndex, visualizer);
                 audioSource.Stop();
                 audioSource.clip = Sensors;
                 audioSource.Play();
-			}
+            }
 
             // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
             if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")
@@ -158,10 +158,10 @@ public class LabHomesARController : MonoBehaviour
 
             // Remove the objects for each scene when the image for that scene is no longer tracking
             if (image.TrackingState == TrackingState.Stopped && visualizer != null)
-			{
-				m_Visualizers.Remove(image.DatabaseIndex);
-				GameObject.Destroy(visualizer.gameObject);
-			}
+            {
+                m_Visualizers.Remove(image.DatabaseIndex);
+                GameObject.Destroy(visualizer.gameObject);
+            }
             if (image.TrackingState == TrackingState.Stopped && visualizerBlinds != null)
             {
                 GameObject.Destroy(visualizerBlinds.gameObject);
