@@ -1,4 +1,14 @@
-﻿using UnityEngine;
+﻿//-----------------------------------------------------------------------
+// File: MonthTextController.cs
+// Author: Moriyoshi Rempola
+// Application: Lab Homes AR
+// Programming Language: C#
+// Course: Computer Science 423
+// Semester: Spring 2019
+// Team: Night Owls
+//-----------------------------------------------------------------------
+
+using UnityEngine;
 using UnityEngine.UI;
 
 public class MonthTextController : MonoBehaviour

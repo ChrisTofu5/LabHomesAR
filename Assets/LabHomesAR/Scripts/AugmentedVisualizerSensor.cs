@@ -1,4 +1,14 @@
-﻿using GoogleARCore;
+﻿//-----------------------------------------------------------------------
+// File: AugmentedVisualizerSensor.cs
+// Author: Christopher McCall
+// Application: Lab Homes AR
+// Programming Language: C#
+// Course: Computer Science 423
+// Semester: Spring 2019
+// Team: Night Owls
+//-----------------------------------------------------------------------
+
+using GoogleARCore;
 using UnityEngine;
 
 public class AugmentedVisualizerSensor : MonoBehaviour

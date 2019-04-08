@@ -1,4 +1,14 @@
-﻿using GoogleARCore;
+﻿//-----------------------------------------------------------------------
+// File: BlindsVisualizer.cs
+// Author: Moriyoshi Rempola
+// Application: Lab Homes AR
+// Programming Language: C#
+// Course: Computer Science 423
+// Semester: Spring 2019
+// Team: Night Owls
+//-----------------------------------------------------------------------
+
+using GoogleARCore;
 using UnityEngine;
 
 public class BlindsVisualizer : MonoBehaviour

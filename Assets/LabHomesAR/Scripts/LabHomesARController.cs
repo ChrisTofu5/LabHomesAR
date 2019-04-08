@@ -1,4 +1,14 @@
-﻿using System.Collections;
+﻿//-----------------------------------------------------------------------
+// File: LabHomesARController.cs
+// Author: Christopher McCall
+// Application: Lab Homes AR
+// Programming Language: C#
+// Course: Computer Science 423
+// Semester: Spring 2019
+// Team: Night Owls
+//-----------------------------------------------------------------------
+
+using System.Collections;
 using System.Collections.Generic;
 using GoogleARCore;
 using UnityEngine;
