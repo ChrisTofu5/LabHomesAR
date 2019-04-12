@@ -43,12 +43,12 @@ public class LabHomesARController : MonoBehaviour
     public Text monthIndicator;
 
     // Objects and variables that are defined in the script
-    private Dictionary<int, AugmentedVisualizerSensor> m_Visualizers = new Dictionary<int, AugmentedVisualizerSensor>();
     private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
     private List<DetectedPlane> m_AllPlanes = new List<DetectedPlane>();
     private GameObject humanObject;
     private GameObject lampObject;
-    private BlindsVisualizer visualizerBlinds = null;
+    private AugmentedVisualizerSensor sensorsVisualizer = null;
+    private BlindsVisualizer blindsVisualizer = null;
     private GameObject doubleWindow = null;
     private GameObject tripleWindow = null;
     private bool planeFound = false;
@@ -106,46 +106,43 @@ public class LabHomesARController : MonoBehaviour
         // have a visualizer. Remove visualizers for stopped images.
         foreach (var image in m_TempAugmentedImages)
         {
-            AugmentedVisualizerSensor visualizer = null;
-            m_Visualizers.TryGetValue(image.DatabaseIndex, out visualizer);
-
             // Upon detection of the "Sensors" image run the Sensors scene
-            if (image.TrackingState == TrackingState.Tracking && visualizer == null && image.Name == "Sensors")
+            if (image.TrackingState == TrackingState.Tracking && sensorsVisualizer == null && blindsVisualizer == null && doubleWindow == null && runHumanScene == false && image.Name == "Sensors")
             {
                 // Create an anchor to ensure that ARCore keeps tracking this augmented image.
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
-                visualizer = (AugmentedVisualizerSensor)Instantiate(AugmentedVisualizerSensorPrefab, anchor.transform);
-                visualizer.Image = image;
-                m_Visualizers.Add(image.DatabaseIndex, visualizer);
+                sensorsVisualizer = (AugmentedVisualizerSensor)Instantiate(AugmentedVisualizerSensorPrefab, anchor.transform);
+                sensorsVisualizer.Image = image;
+
+                ExitButton.gameObject.SetActive(true);
+                ExitButton.onClick.AddListener(ExitSensorsScene);
+
                 audioSource.Stop();
                 audioSource.clip = Sensors;
                 audioSource.Play();
             }
 
             // Upon detection of the "LightBulb" image run the Light Bulb/Human scene
-            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")
+            if (image.TrackingState == TrackingState.Tracking && sensorsVisualizer == null && blindsVisualizer == null && doubleWindow == null && runHumanScene == false && image.Name == "LightBulb")
             {
-                if (runHumanScene == false)
-                {
-                    SearchingForPlaneUI.SetActive(true);
-                    ExitButton.gameObject.SetActive(true);
-                    ExitButton.onClick.AddListener(ExitHumanScene);
-                    runHumanScene = true;
-                    FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
-                    audioSource.Stop();
-                    audioSource.clip = LampOff;
-                    audioSource.Play();
-                }
+                runHumanScene = true;
+                SearchingForPlaneUI.SetActive(true);
+                ExitButton.gameObject.SetActive(true);
+                ExitButton.onClick.AddListener(ExitHumanScene);
+                FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Horizontal;
+                audioSource.Stop();
+                audioSource.clip = LampOff;
+                audioSource.Play();
             }
 
             // Upon detection of the "Blinds" image run the Automated Blinds scene
-            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "Blinds")
+            if (image.TrackingState == TrackingState.Tracking && sensorsVisualizer == null && blindsVisualizer == null && doubleWindow == null && runHumanScene == false && image.Name == "Blinds")
             {
                 slider.gameObject.SetActive(true);
 
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
-                visualizerBlinds = (BlindsVisualizer)Instantiate(blinds, anchor.transform);
-                visualizerBlinds.Image = image;
+                blindsVisualizer = (BlindsVisualizer)Instantiate(blinds, anchor.transform);
+                blindsVisualizer.Image = image;
 
                 audioSource.Stop();
                 audioSource.clip = AutoBlindsUp;
@@ -154,7 +151,7 @@ public class LabHomesARController : MonoBehaviour
             }
 
             // Upon detection of the "Window" image run the Triple Pane Windows scene
-            if (image.TrackingState == TrackingState.Tracking && visualizerBlinds == null && doubleWindow == null && runHumanScene == false && image.Name == "Window")
+            if (image.TrackingState == TrackingState.Tracking && sensorsVisualizer == null && blindsVisualizer == null && doubleWindow == null && runHumanScene == false && image.Name == "Window")
             {
                 Anchor anchor = image.CreateAnchor(image.CenterPose);
                 doubleWindow = Instantiate(DoublePaneWindow, anchor.transform);
@@ -167,14 +164,13 @@ public class LabHomesARController : MonoBehaviour
             }
 
             // Remove the objects for each scene when the image for that scene is no longer tracking
-            if (image.TrackingState == TrackingState.Stopped && visualizer != null)
+            if (image.TrackingState == TrackingState.Stopped && sensorsVisualizer != null)
             {
-                m_Visualizers.Remove(image.DatabaseIndex);
-                GameObject.Destroy(visualizer.gameObject);
+                GameObject.Destroy(sensorsVisualizer.gameObject);
             }
-            if (image.TrackingState == TrackingState.Stopped && visualizerBlinds != null)
+            if (image.TrackingState == TrackingState.Stopped && blindsVisualizer != null)
             {
-                GameObject.Destroy(visualizerBlinds.gameObject);
+                GameObject.Destroy(blindsVisualizer.gameObject);
             }
             if (image.TrackingState == TrackingState.Stopped && doubleWindow != null)
             {
@@ -183,17 +179,8 @@ public class LabHomesARController : MonoBehaviour
             }
         }
 
-        // Show the fit-to-scan overlay if there are no images that are Tracking.
-        foreach (var visualizer in m_Visualizers.Values)
-        {
-            if (visualizer.Image.TrackingState == TrackingState.Tracking)
-            {
-                FitToScanOverlay.SetActive(false);
-                return;
-            }
-        }
         // Do not show the fit-to-scan overlay if a scene is running
-        if (runHumanScene == true || visualizerBlinds != null || doubleWindow != null)
+        if (sensorsVisualizer != null || blindsVisualizer != null || doubleWindow != null || runHumanScene == true)
         {
             FitToScanOverlay.SetActive(false);
         }
@@ -201,6 +188,18 @@ public class LabHomesARController : MonoBehaviour
         {
             FitToScanOverlay.SetActive(true);
         }
+    }
+
+    // This function exits the Sensors scene
+    void ExitSensorsScene()
+    {
+        audioSource.Stop();
+
+        GameObject.Destroy(sensorsVisualizer.gameObject);
+
+        // turn off UI elements
+        ExitButton.gameObject.SetActive(false);
+        ExitButton.onClick.RemoveListener(ExitSensorsScene);
     }
 
     // This function toggles the lamp for the Light Bulb/Human scene
@@ -298,7 +297,7 @@ public class LabHomesARController : MonoBehaviour
         StopCoroutine("CheckBlindsDown");
         StopCoroutine("BlindsDownAudio");
 
-        GameObject.Destroy(visualizerBlinds.gameObject);
+        GameObject.Destroy(blindsVisualizer.gameObject);
 
         // turn off UI elements
         ExitButton.gameObject.SetActive(false);
