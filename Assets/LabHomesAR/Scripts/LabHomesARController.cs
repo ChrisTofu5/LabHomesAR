@@ -16,15 +16,11 @@ using UnityEngine.UI;
 
 public class LabHomesARController : MonoBehaviour
 {
-    /// <summary>
-    /// Prefabs for visualizing an AugmentedImage.
-    /// </summary>
+    // Prefabs for visualizing an AugmentedImage.
     public AugmentedVisualizerSensor AugmentedVisualizerSensorPrefab;
     public BlindsVisualizer blinds;
 
-    /// <summary>
-    /// The overlay containing the fit to scan user guide.
-    /// </summary>
+    // The overlay containing the fit to scan user guide.
     public GameObject FitToScanOverlay;
 
     // Objects that are connected to the script through the scene
@@ -43,6 +39,7 @@ public class LabHomesARController : MonoBehaviour
     public Text monthIndicator;
 
     // Objects and variables that are defined in the script
+    private GameObject ARCoreDevice;
     private List<AugmentedImage> m_TempAugmentedImages = new List<AugmentedImage>();
     private List<DetectedPlane> m_AllPlanes = new List<DetectedPlane>();
     private GameObject humanObject;
@@ -76,6 +73,7 @@ public class LabHomesARController : MonoBehaviour
     void Start()
     {
         audioSource = gameObject.AddComponent<AudioSource>();
+        ARCoreDevice = GameObject.Find("ARCore Device");
     }
 
     // This function is called every frame and controls the application. It runs the scenes and displays the buttons and 3D objects after the target images are detected.
@@ -102,8 +100,7 @@ public class LabHomesARController : MonoBehaviour
         // Get updated augmented images for this frame.
         Session.GetTrackables<AugmentedImage>(m_TempAugmentedImages, TrackableQueryFilter.Updated);
 
-        // Create visualizers and anchors for updated augmented images that are tracking and do not previously
-        // have a visualizer. Remove visualizers for stopped images.
+        // Create visualizers and anchors for updated augmented images that are tracking and do not previously have a visualizer.
         foreach (var image in m_TempAugmentedImages)
         {
             // Upon detection of the "Sensors" image run the Sensors scene
@@ -162,21 +159,6 @@ public class LabHomesARController : MonoBehaviour
                 audioSource.Stop();
                 WindowScene();
             }
-
-            // Remove the objects for each scene when the image for that scene is no longer tracking
-            if (image.TrackingState == TrackingState.Stopped && sensorsVisualizer != null)
-            {
-                GameObject.Destroy(sensorsVisualizer.gameObject);
-            }
-            if (image.TrackingState == TrackingState.Stopped && blindsVisualizer != null)
-            {
-                GameObject.Destroy(blindsVisualizer.gameObject);
-            }
-            if (image.TrackingState == TrackingState.Stopped && doubleWindow != null)
-            {
-                GameObject.Destroy(doubleWindow);
-                GameObject.Destroy(tripleWindow);
-            }
         }
 
         // Do not show the fit-to-scan overlay if a scene is running
@@ -190,6 +172,22 @@ public class LabHomesARController : MonoBehaviour
         }
     }
 
+    // This function destroys the current ARCore session and creates a new ARCore session
+    IEnumerator CreateNewSession()
+    {
+        // Destroy the current session
+        ARCoreSession session = ARCoreDevice.GetComponent<ARCoreSession>();
+        ARCoreSessionConfig config = session.SessionConfig;
+        DestroyImmediate(session);
+
+        yield return null;
+
+        // Create a new session
+        session = ARCoreDevice.AddComponent<ARCoreSession>();
+        session.SessionConfig = config;
+        session.enabled = true;
+    }
+
     // This function exits the Sensors scene
     void ExitSensorsScene()
     {
@@ -200,6 +198,8 @@ public class LabHomesARController : MonoBehaviour
         // turn off UI elements
         ExitButton.gameObject.SetActive(false);
         ExitButton.onClick.RemoveListener(ExitSensorsScene);
+
+        StartCoroutine(CreateNewSession());
     }
 
     // This function toggles the lamp for the Light Bulb/Human scene
@@ -244,6 +244,8 @@ public class LabHomesARController : MonoBehaviour
         ExitButton.onClick.RemoveListener(ExitHumanScene);
         SearchingForPlaneUI.SetActive(false);
         FindObjectOfType<ARCoreSession>().SessionConfig.PlaneFindingMode = DetectedPlaneFindingMode.Disabled;
+
+        StartCoroutine(CreateNewSession());
     }
 
     // This function runs the Light Bulb/Human scene
@@ -304,6 +306,8 @@ public class LabHomesARController : MonoBehaviour
         ExitButton.onClick.RemoveListener(ExitBlindsScene);
         slider.gameObject.SetActive(false);
         monthIndicator.gameObject.SetActive(false);
+
+        StartCoroutine(CreateNewSession());
     }
 
     // This function runs the Automated Blinds scene
@@ -401,6 +405,8 @@ public class LabHomesARController : MonoBehaviour
         DoublePaneButton.onClick.RemoveListener(DoublePane);
         TriplePaneButton.gameObject.SetActive(false);
         DoublePaneButton.onClick.RemoveListener(TriplePane);
+
+        StartCoroutine(CreateNewSession());
     }
 
     // This function runs the Triple Pane Windows scene
